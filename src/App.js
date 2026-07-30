@@ -22,24 +22,26 @@ function App() {
   const [usuarioConectado, setUsuarioConectado] = useState(null);
   const [credentials, setCredentials] = useState({ cedula: '', password: '' });
   const [errorMsg, setErrorMsg] = useState('');
-  const [mostrarPassword, setMostrarPassword] = useState(false); // Estado para el ojito
+  const [mostrarPassword, setMostrarPassword] = useState(false);
   
   const [vistaActual, setVistaActual] = useState('dashboard-admin');
   const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false);
 
-  // BASE DE DATOS DE USUARIOS (Soporta contraseñas demo '1234' y '123456')
+  // BASE DE DATOS DE USUARIOS (Con contraseña segura para evitar alertas de filtración)
+  const CLAVE_SEGURA = 'Gtemp2026!*';
+
   const [listaUsuarios] = useState([
-    { id: 1, cedula: '10987654321', nombre: 'Coordinador respaldo demo', perfil: 'coordinador', passwordActual: '1234', activo: true },
-    { id: 2, cedula: '20987654321', nombre: 'Gerente respaldo demo', perfil: 'gerente', passwordActual: '1234', activo: true },
-    { id: 3, cedula: '30987654321', nombre: 'Director respaldo demo', perfil: 'director', passwordActual: '1234', activo: true },
-    { id: 4, cedula: '40987654321', nombre: 'Financiero respaldo demo', perfil: 'financiero', passwordActual: '1234', activo: true },
-    { id: 5, cedula: '50987654321', nombre: 'Auxiliar respaldo demo', perfil: 'auxiliar', passwordActual: '1234', activo: true },
-    { id: 6, cedula: '1234567890', nombre: 'Técnico demo', perfil: 'tecnico', passwordActual: '1234', activo: true },
-    { id: 7, cedula: '9876543210', nombre: 'Coordinador demo', perfil: 'coordinador', passwordActual: '1234', activo: true },
-    { id: 8, cedula: '3333333333', nombre: 'Gerente demo', perfil: 'gerente', passwordActual: '1234', activo: true },
-    { id: 9, cedula: '4444444444', nombre: 'Director demo', perfil: 'director', passwordActual: '1234', activo: true },
-    { id: 10, cedula: '5555555555', nombre: 'Auxiliar financiero demo', perfil: 'auxiliar', passwordActual: '1234', activo: true },
-    { id: 11, cedula: '1111111111', nombre: 'Administrador demo', perfil: 'administrador', passwordActual: '1234', activo: true }
+    { id: 1, cedula: '10987654321', nombre: 'Coordinador respaldo demo', perfil: 'coordinador', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 2, cedula: '20987654321', nombre: 'Gerente respaldo demo', perfil: 'gerente', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 3, cedula: '30987654321', nombre: 'Director respaldo demo', perfil: 'director', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 4, cedula: '40987654321', nombre: 'Financiero respaldo demo', perfil: 'financiero', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 5, cedula: '50987654321', nombre: 'Auxiliar respaldo demo', perfil: 'auxiliar', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 6, cedula: '1234567890', nombre: 'Técnico demo', perfil: 'tecnico', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 7, cedula: '9876543210', nombre: 'Coordinador demo', perfil: 'coordinador', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 8, cedula: '3333333333', nombre: 'Gerente demo', perfil: 'gerente', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 9, cedula: '4444444444', nombre: 'Director demo', perfil: 'director', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 10, cedula: '5555555555', nombre: 'Auxiliar financiero demo', perfil: 'auxiliar', passwordActual: CLAVE_SEGURA, activo: true },
+    { id: 11, cedula: '1111111111', nombre: 'Administrador demo', perfil: 'administrador', passwordActual: CLAVE_SEGURA, activo: true }
   ]);
 
   const handleChange = (e) => {
@@ -67,8 +69,7 @@ function App() {
       return;
     }
 
-    // Acepta tanto '1234' como la clave configurada o '123456'
-    if (credentials.password !== usuarioEncontrado.passwordActual && credentials.password !== '123456' && credentials.password !== '1234') {
+    if (credentials.password !== usuarioEncontrado.passwordActual) {
       setErrorMsg('Error: Contraseña incorrecta. Verifique sus datos e intente de nuevo.');
       return;
     }
