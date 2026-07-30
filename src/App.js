@@ -19,36 +19,71 @@ import Ayuda from './Ayuda';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('Administrador');
+  const [usuarioConectado, setUsuarioConectado] = useState(null);
   const [credentials, setCredentials] = useState({ cedula: '', password: '' });
   const [errorMsg, setErrorMsg] = useState('');
   
   const [vistaActual, setVistaActual] = useState('dashboard-admin');
   const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false);
 
+  // BASE DE DATOS DE USUARIOS (Con sus respectivas cédulas, contraseñas y roles)
+  const [listaUsuarios] = useState([
+    { id: 1, cedula: '10987654321', nombre: 'Coordinador respaldo demo', perfil: 'coordinador', passwordActual: '123456', activo: true },
+    { id: 2, cedula: '20987654321', nombre: 'Gerente respaldo demo', perfil: 'gerente', passwordActual: '123456', activo: true },
+    { id: 3, cedula: '30987654321', nombre: 'Director respaldo demo', perfil: 'director', passwordActual: '123456', activo: true },
+    { id: 4, cedula: '40987654321', nombre: 'Financiero respaldo demo', perfil: 'financiero', passwordActual: '123456', activo: true },
+    { id: 5, cedula: '50987654321', nombre: 'Auxiliar respaldo demo', perfil: 'auxiliar', passwordActual: '123456', activo: true },
+    { id: 6, cedula: '1234567890', nombre: 'Técnico demo', perfil: 'tecnico', passwordActual: '123456', activo: true },
+    { id: 7, cedula: '9876543210', nombre: 'Coordinador demo', perfil: 'coordinador', passwordActual: '123456', activo: true },
+    { id: 8, cedula: '3333333333', nombre: 'Gerente demo', perfil: 'gerente', passwordActual: '123456', activo: true },
+    { id: 9, cedula: '4444444444', nombre: 'Director demo', perfil: 'director', passwordActual: '123456', activo: true },
+    { id: 10, cedula: '5555555555', nombre: 'Auxiliar financiero demo', perfil: 'auxiliar', passwordActual: '123456', activo: true },
+    { id: 11, cedula: '1111111111', nombre: 'Administrador demo', perfil: 'administrador', passwordActual: '123456', activo: true }
+  ]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials({ ...credentials, [name]: value });
   };
 
+  // VALIDACIÓN DE CREDENCIALES AL INICIAR SESIÓN
   const handleLogin = (e) => {
     e.preventDefault();
+    
     if (!credentials.cedula || !credentials.password) {
       setErrorMsg('Todos los campos son obligatorios.');
       return;
     }
-    
-    if (!/^\d{7,10}$/.test(credentials.cedula)) {
-      setErrorMsg('Ingrese un número de cédula válido.');
+
+    // 1. Buscar usuario por Cédula
+    const usuarioEncontrado = listaUsuarios.find(u => u.cedula === credentials.cedula);
+
+    if (!usuarioEncontrado) {
+      setErrorMsg('Error: La cédula ingresada no se encuentra registrada.');
       return;
     }
 
+    // 2. Validar si la cuenta está bloqueada / inactiva
+    if (!usuarioEncontrado.activo) {
+      setErrorMsg('Error: Su cuenta se encuentra bloqueada/desactivada. Contacte al Administrador.');
+      return;
+    }
+
+    // 3. Validar Contraseña Exacta
+    if (credentials.password !== usuarioEncontrado.passwordActual) {
+      setErrorMsg('Error: Contraseña incorrecta. Verifique sus datos e intente de nuevo.');
+      return;
+    }
+
+    // Si todo es correcto, autoriza el ingreso
     setErrorMsg('');
+    setUsuarioConectado(usuarioEncontrado);
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setUsuarioConectado(null);
     setCredentials({ cedula: '', password: '' });
     setVistaActual('dashboard-admin');
   };
@@ -99,7 +134,7 @@ function App() {
                   value={credentials.cedula}
                   onChange={handleChange}
                   autoComplete="off"
-                  maxLength={10}
+                  maxLength={11}
                 />
               </div>
 
@@ -171,14 +206,16 @@ function App() {
               >
                 🔔
               </button>
-              <span className="badge-role">{userRole}</span>
+              <span className="badge-role" style={{ textTransform: 'capitalize' }}>
+                {usuarioConectado?.perfil || 'Usuario'}
+              </span>
               <button onClick={() => setVistaActual('inicio')} className="btn-nav-action">Inicio</button>
               <button onClick={handleLogout} className="btn-nav-action">Salir</button>
             </div>
           </nav>
 
           <div className="sub-header-user">
-            - Administrador
+            - {usuarioConectado?.nombre || 'Usuario'}
           </div>
 
           {/* BARRA DE PESTAÑAS RÁPIDAS ADMINISTRATIVAS */}
@@ -291,7 +328,7 @@ function App() {
             ) : vistaActual === 'dinero' ? (
               <Dinero onVolver={() => setVistaActual('dashboard-admin')} />
             ) : vistaActual === 'usuarios' ? (
-              <Usuarios onVolver={() => setVistaActual('dashboard-admin')} />
+              <Usuarios onVolver={() => setVistaActual('dashboard-admin')} usuarioLogueado={usuarioConectado} />
             ) : (
               <DashboardAdmin onNavegar={(vista) => setVistaActual(vista)} />
             )}
