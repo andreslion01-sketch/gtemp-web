@@ -22,23 +22,24 @@ function App() {
   const [usuarioConectado, setUsuarioConectado] = useState(null);
   const [credentials, setCredentials] = useState({ cedula: '', password: '' });
   const [errorMsg, setErrorMsg] = useState('');
+  const [mostrarPassword, setMostrarPassword] = useState(false); // Estado para el ojito
   
   const [vistaActual, setVistaActual] = useState('dashboard-admin');
   const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false);
 
-  // BASE DE DATOS DE USUARIOS (Con sus respectivas cédulas, contraseñas y roles)
+  // BASE DE DATOS DE USUARIOS (Soporta contraseñas demo '1234' y '123456')
   const [listaUsuarios] = useState([
-    { id: 1, cedula: '10987654321', nombre: 'Coordinador respaldo demo', perfil: 'coordinador', passwordActual: '123456', activo: true },
-    { id: 2, cedula: '20987654321', nombre: 'Gerente respaldo demo', perfil: 'gerente', passwordActual: '123456', activo: true },
-    { id: 3, cedula: '30987654321', nombre: 'Director respaldo demo', perfil: 'director', passwordActual: '123456', activo: true },
-    { id: 4, cedula: '40987654321', nombre: 'Financiero respaldo demo', perfil: 'financiero', passwordActual: '123456', activo: true },
-    { id: 5, cedula: '50987654321', nombre: 'Auxiliar respaldo demo', perfil: 'auxiliar', passwordActual: '123456', activo: true },
-    { id: 6, cedula: '1234567890', nombre: 'Técnico demo', perfil: 'tecnico', passwordActual: '123456', activo: true },
-    { id: 7, cedula: '9876543210', nombre: 'Coordinador demo', perfil: 'coordinador', passwordActual: '123456', activo: true },
-    { id: 8, cedula: '3333333333', nombre: 'Gerente demo', perfil: 'gerente', passwordActual: '123456', activo: true },
-    { id: 9, cedula: '4444444444', nombre: 'Director demo', perfil: 'director', passwordActual: '123456', activo: true },
-    { id: 10, cedula: '5555555555', nombre: 'Auxiliar financiero demo', perfil: 'auxiliar', passwordActual: '123456', activo: true },
-    { id: 11, cedula: '1111111111', nombre: 'Administrador demo', perfil: 'administrador', passwordActual: '123456', activo: true }
+    { id: 1, cedula: '10987654321', nombre: 'Coordinador respaldo demo', perfil: 'coordinador', passwordActual: '1234', activo: true },
+    { id: 2, cedula: '20987654321', nombre: 'Gerente respaldo demo', perfil: 'gerente', passwordActual: '1234', activo: true },
+    { id: 3, cedula: '30987654321', nombre: 'Director respaldo demo', perfil: 'director', passwordActual: '1234', activo: true },
+    { id: 4, cedula: '40987654321', nombre: 'Financiero respaldo demo', perfil: 'financiero', passwordActual: '1234', activo: true },
+    { id: 5, cedula: '50987654321', nombre: 'Auxiliar respaldo demo', perfil: 'auxiliar', passwordActual: '1234', activo: true },
+    { id: 6, cedula: '1234567890', nombre: 'Técnico demo', perfil: 'tecnico', passwordActual: '1234', activo: true },
+    { id: 7, cedula: '9876543210', nombre: 'Coordinador demo', perfil: 'coordinador', passwordActual: '1234', activo: true },
+    { id: 8, cedula: '3333333333', nombre: 'Gerente demo', perfil: 'gerente', passwordActual: '1234', activo: true },
+    { id: 9, cedula: '4444444444', nombre: 'Director demo', perfil: 'director', passwordActual: '1234', activo: true },
+    { id: 10, cedula: '5555555555', nombre: 'Auxiliar financiero demo', perfil: 'auxiliar', passwordActual: '1234', activo: true },
+    { id: 11, cedula: '1111111111', nombre: 'Administrador demo', perfil: 'administrador', passwordActual: '1234', activo: true }
   ]);
 
   const handleChange = (e) => {
@@ -46,7 +47,6 @@ function App() {
     setCredentials({ ...credentials, [name]: value });
   };
 
-  // VALIDACIÓN DE CREDENCIALES AL INICIAR SESIÓN
   const handleLogin = (e) => {
     e.preventDefault();
     
@@ -55,7 +55,6 @@ function App() {
       return;
     }
 
-    // 1. Buscar usuario por Cédula
     const usuarioEncontrado = listaUsuarios.find(u => u.cedula === credentials.cedula);
 
     if (!usuarioEncontrado) {
@@ -63,19 +62,17 @@ function App() {
       return;
     }
 
-    // 2. Validar si la cuenta está bloqueada / inactiva
     if (!usuarioEncontrado.activo) {
       setErrorMsg('Error: Su cuenta se encuentra bloqueada/desactivada. Contacte al Administrador.');
       return;
     }
 
-    // 3. Validar Contraseña Exacta
-    if (credentials.password !== usuarioEncontrado.passwordActual) {
+    // Acepta tanto '1234' como la clave configurada o '123456'
+    if (credentials.password !== usuarioEncontrado.passwordActual && credentials.password !== '123456' && credentials.password !== '1234') {
       setErrorMsg('Error: Contraseña incorrecta. Verifique sus datos e intente de nuevo.');
       return;
     }
 
-    // Si todo es correcto, autoriza el ingreso
     setErrorMsg('');
     setUsuarioConectado(usuarioEncontrado);
     setIsAuthenticated(true);
@@ -140,15 +137,34 @@ function App() {
 
               <div className="form-group">
                 <label htmlFor="password">Contraseña</label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Ingrese su contraseña"
-                  value={credentials.password}
-                  onChange={handleChange}
-                  autoComplete="current-password"
-                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <input
+                    type={mostrarPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    placeholder="Ingrese su contraseña"
+                    value={credentials.password}
+                    onChange={handleChange}
+                    autoComplete="current-password"
+                    style={{ width: '100%', paddingRight: '40px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarPassword(!mostrarPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '18px',
+                      userSelect: 'none'
+                    }}
+                    title={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  >
+                    {mostrarPassword ? '👁️‍🗨️' : '👁️'}
+                  </button>
+                </div>
               </div>
 
               <button type="submit" className="btn-submit">Entrar</button>
@@ -157,7 +173,6 @@ function App() {
         </div>
       ) : (
         <div className="dashboard-wrapper">
-          {/* NAV BAR SUPERIOR PRINCIPAL */}
           <nav className="navbar">
             <div className="nav-left">
               <div className="nav-brand">
@@ -218,7 +233,6 @@ function App() {
             - {usuarioConectado?.nombre || 'Usuario'}
           </div>
 
-          {/* BARRA DE PESTAÑAS RÁPIDAS ADMINISTRATIVAS */}
           <div className="quick-tabs-bar">
             <div className="quick-tabs">
               <button 
